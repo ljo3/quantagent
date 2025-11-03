@@ -247,6 +247,14 @@ def greet_user(
 
 if __name__ == "__main__":
     import os
+    import uvicorn
+    
     port = int(os.environ.get("PORT", 8080))
-    mcp.run(transport="streamable-http", host="0.0.0.0", port=port)
+    
+    # Get the ASGI app from FastMCP
+    app = mcp.get_asgi_app(transport="streamable-http")
+    
+    # Run with uvicorn configured for Lambda
+    uvicorn.run(app, host="0.0.0.0", port=port, log_level="info")
+
 
