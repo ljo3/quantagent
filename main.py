@@ -51,15 +51,9 @@ def build_portfolio():
     portIdx = result['lhs'][2]['mwdata']
     prsk = result['lhs'][3]['mwdata']
     pret = result['lhs'][4]['mwdata']
-    resultDynamicPtf = {
-        "WealthGrid": wgrid,
-        "ValuePortfolio": valuePtf,
-        "OptimalPortfolioIndex": portIdx,
-        "ProbSuccess": prsk,
-        "ProbReturn": pret
-    }
 
-    return resultDynamicPtf
+
+    return "resultDynamicPtf"
 
 @mcp.tool(
     title="Echo Tool",
