@@ -14,28 +14,24 @@ mcp = FastMCP("Echo Server", stateless_http=True)
 
 
 @mcp.tool(title="Build Portfolio", description="Construct a portfolio based on given parameters.")
-def build_portfolio():
-    import requests
+async def build_portfolio():
+    import httpx
+
     # Define the input parameters
     payload = {
         "nargout": 5,  # DynamicPortSim returns four outputs: Z, WPath, portPath, VPath
-        "rhs": [
-            100,
-            200,
-            10
-        ]
+        "rhs": [100, 200, 10]
     }
 
     # Define the endpoint and headers
     url = "http://20.199.27.70:9910/GBWM/buildPtfAndComputeProbs"
-    headers = {
-        "Content-Type": "application/json"
-    }
+    headers = {"Content-Type": "application/json"}
 
-    # Send the POST request
-    response = requests.post(url, headers=headers, json=payload, timeout=60)
+    # Send the POST request using httpx
+    async with httpx.AsyncClient(timeout=10) as client:
+        response = await client.post(url, headers=headers, json=payload)
 
-    # Parse and print the response
+    # Parse and handle the response
     if response.status_code == 200:
         result = response.json()
         wgrid = result['lhs'][0]['mwdata']
@@ -43,10 +39,18 @@ def build_portfolio():
         portIdx = result['lhs'][2]['mwdata']
         prsk = result['lhs'][3]['mwdata']
         pret = result['lhs'][4]['mwdata']
-    else:
-        print("Error:", response.status_code, response.text)
 
-    return "resultDynamicPtf"
+        # Return structured data instead of a static string
+        return {
+            "wgrid": wgrid,
+            "valuePtf": valuePtf,
+            "portIdx": portIdx,
+            "prsk": prsk,
+            "pret": pret
+        }
+    else:
+        return {"error": f"Status {response.status_code}: {response.text}"}
+
 
 @mcp.tool(
     title="Echo Tool",
