@@ -10,6 +10,7 @@ dependencies = [
     "black>=25.1.0",
     "mcp",
      "requests",
+     "httpx",
     "numpy",
     "pandas",
 ]
