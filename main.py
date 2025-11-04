@@ -7,41 +7,15 @@ from pydantic import Field
 
 import numpy as np
 import pandas as pd
+import requests
 
 import mcp.types as types
 
 mcp = FastMCP("Echo Server", stateless_http=True)
 
 
-def reshape_column_major(data, rows, cols):
-    """
-    Reshape a flat list into a matrix with given rows and cols,
-    preserving MATLAB's column-major order.
-
-    Parameters:
-        data (list): Flat list of length rows*cols
-        rows (int): Number of rows
-        cols (int): Number of columns
-
-    Returns:
-        list of lists: Matrix with dimensions [rows][cols]
-    """
-    if len(data) != rows * cols:
-        raise ValueError(f"Data length {len(data)} does not match rows*cols ({rows*cols}).")
-
-    matrix = [[None] * cols for _ in range(rows)]
-    for idx, val in enumerate(data):
-        col = idx // rows
-        row = idx % rows
-        matrix[row][col] = val
-    return matrix
-
-
 @mcp.tool(title="Build Portfolio", description="Construct a portfolio based on given parameters.")
 def build_portfolio():
-    import requests
-    import json
-
     # Define the input parameters
     payload = {
         "nargout": 5,  # DynamicPortSim returns four outputs: Z, WPath, portPath, VPath
@@ -59,11 +33,16 @@ def build_portfolio():
     }
 
     # Send the POST request
-    response = requests.post(url, headers=headers, data=json.dumps(payload))
+    response = requests.post(url, headers=headers, json=payload)
 
     # Parse and print the response
     if response.status_code == 200:
         result = response.json()
+        wgrid = result['lhs'][0]['mwdata']
+        valuePtf = result['lhs'][1]['mwdata']
+        portIdx = result['lhs'][2]['mwdata']
+        prsk = result['lhs'][3]['mwdata']
+        pret = result['lhs'][4]['mwdata']
     else:
         print("Error:", response.status_code, response.text)
 
@@ -72,11 +51,15 @@ def build_portfolio():
     portIdx = result['lhs'][2]['mwdata']
     prsk = result['lhs'][3]['mwdata']
     pret = result['lhs'][4]['mwdata']
+    resultDynamicPtf = {
+        "WealthGrid": wgrid,
+        "ValuePortfolio": valuePtf,
+        "OptimalPortfolioIndex": portIdx,
+        "ProbSuccess": prsk,
+        "ProbReturn": pret
+    }
 
-    valuePtf = reshape_column_major(valuePtf, 118, 11)
-    portIdx = reshape_column_major(portIdx, 118, 10)
-    result = {"wgrid": wgrid,"valuePtf": valuePtf,"portIdx": portIdx,"prsk": prsk,"pret": pret}
-    return result
+    return resultDynamicPtf
 
 @mcp.tool(
     title="Echo Tool",
