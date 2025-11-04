@@ -7,7 +7,6 @@ from pydantic import Field
 
 import numpy as np
 import pandas as pd
-import requests
 
 import mcp.types as types
 
@@ -16,6 +15,7 @@ mcp = FastMCP("Echo Server", stateless_http=True)
 
 @mcp.tool(title="Build Portfolio", description="Construct a portfolio based on given parameters.")
 def build_portfolio():
+    import requests
     # Define the input parameters
     payload = {
         "nargout": 5,  # DynamicPortSim returns four outputs: Z, WPath, portPath, VPath
@@ -45,13 +45,6 @@ def build_portfolio():
         pret = result['lhs'][4]['mwdata']
     else:
         print("Error:", response.status_code, response.text)
-
-    wgrid = result['lhs'][0]['mwdata']
-    valuePtf = result['lhs'][1]['mwdata']
-    portIdx = result['lhs'][2]['mwdata']
-    prsk = result['lhs'][3]['mwdata']
-    pret = result['lhs'][4]['mwdata']
-
 
     return "resultDynamicPtf"
 
