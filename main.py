@@ -38,7 +38,7 @@ def reshape_column_major(data, rows, cols):
 
 
 @mcp.tool(title="Build Portfolio", description="Construct a portfolio based on given parameters.")
-async def build_portfolio():
+def build_portfolio():
     import requests
     import json
 
@@ -75,13 +75,8 @@ async def build_portfolio():
 
     valuePtf = reshape_column_major(valuePtf, 118, 11)
     portIdx = reshape_column_major(portIdx, 118, 10)
-    return {
-        "wgrid": wgrid,
-        "valuePtf": valuePtf,
-        "portIdx": portIdx,
-        "prsk": prsk,
-        "pret": pret
-    }
+    result = {"wgrid": wgrid,"valuePtf": valuePtf,"portIdx": portIdx,"prsk": prsk,"pret": pret}
+    return result
 
 @mcp.tool(
     title="Echo Tool",
