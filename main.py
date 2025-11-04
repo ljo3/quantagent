@@ -33,7 +33,7 @@ def build_portfolio():
     }
 
     # Send the POST request
-    response = requests.post(url, headers=headers, json=payload)
+    response = requests.post(url, headers=headers, json=payload, timeout=60)
 
     # Parse and print the response
     if response.status_code == 200:
